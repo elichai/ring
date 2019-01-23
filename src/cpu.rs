@@ -15,11 +15,11 @@
 pub fn cache_detected_features() {
     #[cfg(not(target_os = "ios"))]
     {
-        use std;
+        extern crate spin;
         extern "C" {
             fn GFp_cpuid_setup();
         }
-        static INIT: std::sync::Once = std::sync::ONCE_INIT;
+        static INIT: spin::Once<()> = spin::Once::new();
         INIT.call_once(|| unsafe { GFp_cpuid_setup() });
     }
 }
