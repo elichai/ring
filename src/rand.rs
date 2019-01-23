@@ -277,11 +277,16 @@ mod sysrand_or_urandom {
     feature = "sgx",
     not(any(feature = "dev_urandom_fallback", feature = "use_heap"))))]
 mod sgxrand {
-    use sgx_trts::trts;
+    extern "C" { pub fn sgx_read_rand(rand: * mut u8, length_in_bytes: usize) -> u8; }
     use crate::error;
 
     pub fn fill(dest: &mut [u8]) -> Result<(), error::Unspecified> {
-        trts::rsgx_read_rand(dest).map_err(|_| error::Unspecified)
+        let ret = unsafe { sgx_read_rand(dest.as_mut_ptr(), dest.len()) };
+        if ret != 0 {
+            Err(error::Unspecified)
+        } else {
+            Ok(())
+        }
     }
 
 }
