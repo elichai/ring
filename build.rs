@@ -594,6 +594,23 @@ fn cc(
         let _ = c.flag("-U_FORTIFY_SOURCE");
     }
 
+    #[cfg(feature = "sgx")]
+    {
+        if let Some(sdk) = std::env::var_os("SGX_SDK") {
+            let sdk = sdk.into_string().unwrap();
+            println!("Cool!: {:?}", sdk);
+            let _ = c
+            .flag("-DSGX")
+            .flag("-lsgx_tstdc -lsgx_tstdcxx")
+            .include(sdk.clone() + "/include")
+            .include(sdk.clone() + "/lib64");
+            println!("cargo:rustc-link-search=native={}/lib64", sdk);
+            println!("cargo:rustc-link-search=native={}/include", sdk);
+            println!("cargo:rustc-link-lib=dylib=sgx_tstdc");
+            println!("cargo:rustc-link-lib=dylib=sgx_tstdcxx");
+        }
+    }
+
     let mut c = c.get_compiler().to_command();
     let _ = c
         .arg("-c")
@@ -719,6 +736,7 @@ fn perlasm(
             args.push("-fPIC".into());
             args.push("-DOPENSSL_IA32_SSE2".into());
         }
+        
         // Work around PerlAsm issue for ARM and AAarch64 targets by replacing
         // back slashes with forward slashes.
         let dst = dst

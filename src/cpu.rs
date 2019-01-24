@@ -20,6 +20,6 @@ pub fn cache_detected_features() {
             fn GFp_cpuid_setup();
         }
         static INIT: spin::Once<()> = spin::Once::new();
-        INIT.call_once(|| unsafe { GFp_cpuid_setup() });
+        let _ = INIT.call_once(|| unsafe { GFp_cpuid_setup() });
     }
 }
