@@ -56,7 +56,12 @@
 
 #include <GFp/cpu.h>
 
+#if defined(SGX)
+#pragma message "Have SGX"
 uint32_t sgx_cpuid(uint32_t cpuinfo[4], uint32_t leaf); // This is sgx only
+#else
+#pragma message "Don't have SGX"
+#endif
 
 #if !defined(OPENSSL_NO_ASM) && (defined(OPENSSL_X86) || defined(OPENSSL_X86_64))
 
@@ -95,24 +100,21 @@ static void OPENSSL_cpuid(uint32_t *out_eax, uint32_t *out_ebx,
     : "=a"(*out_eax), "=D"(*out_ebx), "=c"(*out_ecx), "=d"(*out_edx)
     : "a"(leaf)
   );
-#else
-    uint32_t cpuinfo[4] = {0};
-    uint32_t res = sgx_cpuid(cpuinfo, leaf);
-    if(res == 0 ) {
-      *out_eax = cpuinfo[0];
-      *out_ebx = cpuinfo[1];
-      *out_ecx = cpuinfo[2];
-      *out_edx = cpuinfo[3];
 
-    }
-    else {
-      __asm__ volatile (
-        "xor %%ecx, %%ecx\n"
-        "cpuid\n"
-        : "=a"(*out_eax), "=b"(*out_ebx), "=c"(*out_ecx), "=d"(*out_edx)
-        : "a"(leaf)
-      );
-    }
+#elif defined(SGX)
+    uint32_t cpuinfo[4] = {0};
+    sgx_cpuid(cpuinfo, leaf);
+    *out_eax = cpuinfo[0];
+    *out_ebx = cpuinfo[1];
+    *out_ecx = cpuinfo[2];
+    *out_edx = cpuinfo[3];
+#else
+    __asm__ volatile (
+      "xor %%ecx, %%ecx\n"
+      "cpuid\n"
+      : "=a"(*out_eax), "=b"(*out_ebx), "=c"(*out_ecx), "=d"(*out_edx)
+      : "a"(leaf)
+    );
 #endif
 }
 
