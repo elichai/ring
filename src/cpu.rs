@@ -15,7 +15,7 @@
 pub fn cache_detected_features() {
     #[cfg(not(target_os = "ios"))]
     {
-        extern crate spin;
+        use spin;
         extern "C" {
             fn GFp_cpuid_setup();
         }
