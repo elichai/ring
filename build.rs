@@ -596,7 +596,7 @@ fn cc(
             println!("Cool!: {:?}", sdk);
             let _ = c
             .flag("-DSGX")
-            .flag("-lsgx_tstdc -lsgx_tstdcxx")
+            .flag("-lsgx_tstdc -lsgx_trts")
             .include(sdk.clone() + "/include")
             .include(sdk.clone() + "/lib64");
             println!("cargo:rustc-link-search=native={}/lib64", sdk);

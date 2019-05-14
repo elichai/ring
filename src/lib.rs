@@ -56,7 +56,7 @@
     unused_extern_crates,
     unused_import_braces,
     unused_results,
-    warnings
+//    warnings
 )]
 #![cfg_attr(
     any(
